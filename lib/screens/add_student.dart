@@ -3,6 +3,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
+import 'package:student_login/provider/provider.dart';
 
 import '../db_function/db_function.dart';
 import '../models/data_model.dart';
@@ -321,6 +323,7 @@ class _AddState extends State<Add> {
 
   Future<void> addClick(BuildContext ctx) async {
     final name = widget._name.text.trim();
+    log(name);
     final age = widget._age.text.trim();
     final phone = widget._phone.text.trim();
     final domain = widget._domain.text.trim();
@@ -335,17 +338,24 @@ class _AddState extends State<Add> {
           domain: domain,
           img: img);
 
-      await addStudent(student);
+      // await addStudent(student);
+      await Provider.of<ProviderClass>(context , listen: false).addStudent(student);
 
-      ScaffoldMessenger.of(ctx).showSnackBar(const SnackBar(
-        content: Text('data added successfully...'),
-        margin: EdgeInsets.all(20),
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: Colors.green,
-      ));
-      Navigator.of(ctx).pushReplacement(MaterialPageRoute(builder: (context) {
-        return const Home();
-      }));
+      ScaffoldMessenger.of(ctx).showSnackBar(
+        const SnackBar(
+          content: Text('data added successfully...'),
+          margin: EdgeInsets.all(20),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.green,
+        ),
+      );
+      Navigator.of(ctx).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) {
+            return const Home();
+          },
+        ),
+      );
     }
   }
 }

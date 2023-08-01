@@ -3,6 +3,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
+import 'package:student_login/provider/provider.dart';
 
 import '../db_function/db_function.dart';
 import '../models/data_model.dart';
@@ -337,7 +339,8 @@ class _UpdatesState extends State<Updates> {
           domain: domain,
           img: image == null ? widget.model.img : image!.path);
 
-      await updateStudent(student);
+      // await updateStudent(student);
+      Provider.of<ProviderClass>(context, listen: false).updateStudent(student);
 
       ScaffoldMessenger.of(ctx).showSnackBar(const SnackBar(
         content: Text('data updated successfully...'),

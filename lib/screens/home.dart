@@ -1,9 +1,11 @@
-import 'dart:developer';
 import 'dart:io';
 
-import 'package:flutter/material.dart';
 
-import '../db_function/db_function.dart';
+
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:student_login/provider/provider.dart';
+
 import '../models/data_model.dart';
 import 'update.dart';
 
@@ -12,67 +14,34 @@ class Home extends StatefulWidget {
 
   @override
   State<Home> createState() => _HomeState();
+ 
+  
 }
 
 class _HomeState extends State<Home> {
-  Icon cusIcon = const Icon(Icons.search);
-  Widget cusSearchBar = const Text(
-    "Student records",
-  );
-
-  @override
-  void initState() {
-    getAllStudent();
-    super.initState();
-  }
-
   @override
   Widget build(BuildContext context) {
+  
+      Provider.of<ProviderClass>(context).getAllStudent();
+    
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Center(child: cusSearchBar),
+        title: Center(child: context.read<ProviderClass>().customSearchBar),   
         backgroundColor: Colors.purpleAccent,
         actions: <Widget>[
-          InkWell(
-            onTap: () {
-              setState(() {
-                if (cusIcon.icon == Icons.search) {
-                  cusIcon = const Icon(
-                    Icons.cancel,
-                    color: Colors.black,
-                  );
-                  cusSearchBar = TextField(
-                    onChanged: (value) {
-                      search(value);
-                    },
-                    textInputAction: TextInputAction.go,
-                    decoration: InputDecoration(
-                      contentPadding:
-                          const EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      hintText: 'Search',
-                    ),
-                    style: const TextStyle(
-                      color: Colors.black,
-                      fontSize: 16.0,
-                    ),
-                  );
-                } else {
-                  cusIcon = const Icon(
-                    Icons.search,
-                    color: Colors.black,
-                  );
-                  cusSearchBar = const Text("Student records");
-                }
-              });
+          Consumer<ProviderClass>(
+            builder: (context, value, child) {
+              return InkWell(
+                onTap: () {
+                  context.read<ProviderClass>().transform();
+                },
+                child: SizedBox(
+                  width: 100,
+                  child: value.cusIcon,
+                ),
+              );
             },
-            child: SizedBox(
-              width: 100,
-              child: cusIcon,
-            ),
           ),
         ],
       ),
@@ -89,13 +58,12 @@ class _HomeState extends State<Home> {
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      body: ValueListenableBuilder(
-        valueListenable: studentListNotifier,
-        builder: (context, value, child) => Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: ListView.separated(
+      body: Consumer<ProviderClass>(
+        builder: (context, value, child) {
+          return ListView.separated(
             itemBuilder: (ctx, index) {
-              log(studentListNotifier.value[index].name);
+              final data = value.studentList[index];
+              // log(studentListNotifier.value[index].name);
               return Card(
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(60)),
@@ -106,13 +74,14 @@ class _HomeState extends State<Home> {
                     tileColor: Colors.grey,
                     leading: CircleAvatar(
                         radius: 30,
-                        backgroundImage: FileImage(File(value[index].img))),
+                        backgroundImage:
+                            FileImage(File(value.studentList[index].img))),
                     title: Text(
-                      value[index].name,
+                      data.name,
                       style: const TextStyle(color: Colors.white),
                     ),
                     subtitle: Text(
-                      value[index].age,
+                      data.age,
                       style: const TextStyle(color: Colors.white),
                     ),
                     trailing: IconButton(
@@ -141,7 +110,8 @@ class _HomeState extends State<Home> {
                                 TextButton(
                                   child: const Text("Delete"),
                                   onPressed: () {
-                                    deleteStudent(ctx, value[index].id);
+                                    value.deleteStudent(
+                                        ctx, data.id.toString());
 
                                     Navigator.of(context).pop();
                                   },
@@ -154,12 +124,12 @@ class _HomeState extends State<Home> {
                     ),
                     onTap: () {
                       final student = StudentModel(
-                          age: value[index].age,
-                          name: value[index].name,
-                          phone: value[index].phone,
-                          domain: value[index].domain,
-                          img: value[index].img,
-                          id: value[index].id);
+                          age: data.age,
+                          name: data.name,
+                          phone: data.phone,
+                          domain: data.domain,
+                          img: data.img,
+                          id: data.id);
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -172,9 +142,9 @@ class _HomeState extends State<Home> {
             separatorBuilder: (ctx, index) {
               return const Divider();
             },
-            itemCount: studentListNotifier.value.length,
-          ),
-        ),
+            itemCount: value.studentList.length,
+          );
+        },
       ),
     );
   }
